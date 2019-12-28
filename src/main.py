@@ -33,6 +33,7 @@ log = logging.getLogger(__name__)
 
 
 def _setup_database():
+    """Inits the database connection and creates the tables if they doesn't exist yet"""
     db.connect()
     db.create_tables(
         [User, Chat, Link, Artist, Album, Track, Genre, AlbumArtist, AlbumGenre, ArtistGenre, TrackArtist,
@@ -40,6 +41,7 @@ def _setup_database():
 
 
 def _setup_sentry():
+    """Setup Sentry configuration"""
     public_key = getenv('SENTRY_PUBLIC_KEY', None)
     project_id = getenv('SENTRY_PROJECT_ID', None)
 

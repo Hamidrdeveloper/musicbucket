@@ -19,6 +19,7 @@ pylast = "*"
 musicbrainzngs = "*"
 sentry-sdk = "==0.8.0"
 psycopg2 = "*"
+universal-analytics-python3 = "*"
 
 [requires]
 python_version = "3.7"

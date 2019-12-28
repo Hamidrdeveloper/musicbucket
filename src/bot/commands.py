@@ -92,12 +92,16 @@ class Command(ReplyMixin, LoggerMixin):
 
     def run(self):
         self.log_command(self.COMMAND, self.args, self.update)
+        self._push_to_analytics()
         response, reply_markup = self.get_response()
         self.reply(self.update, self.context, response, disable_web_page_preview=not self.WEB_PAGE_PREVIEW,
                    reply_markup=reply_markup)
 
     def get_response(self):
         raise NotImplementedError()
+
+    def _push_to_analytics(self):
+        pass
 
 
 class StartCommand(Command):
