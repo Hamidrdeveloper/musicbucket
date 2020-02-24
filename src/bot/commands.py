@@ -9,6 +9,7 @@ from telegram import Update
 from telegram.ext import CallbackContext
 
 from bot.buttons import DeleteSavedLinkButton
+from bot.google_analytics import GoogleAnalyticsClient
 from bot.logger import LoggerMixin
 from bot.messages import UrlProcessor
 from bot.models import Chat, Link, Album, LastFMUsername, User, CreateOrUpdateMixin, SavedLink, Track, Artist
@@ -89,19 +90,17 @@ class Command(ReplyMixin, LoggerMixin):
         self.update = update
         self.context = context
         self.args = context.args or []
+        self.ga_client = GoogleAnalyticsClient(update, context)
 
     def run(self):
         self.log_command(self.COMMAND, self.args, self.update)
-        self._push_to_analytics()
+        self.ga_client.push_command(self)
         response, reply_markup = self.get_response()
         self.reply(self.update, self.context, response, disable_web_page_preview=not self.WEB_PAGE_PREVIEW,
                    reply_markup=reply_markup)
 
     def get_response(self):
         raise NotImplementedError()
-
-    def _push_to_analytics(self):
-        pass
 
 
 class StartCommand(Command):

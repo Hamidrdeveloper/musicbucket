@@ -2,6 +2,7 @@ import logging
 
 from telegram import InlineQueryResultArticle, InputTextMessageContent
 
+from bot.google_analytics import GoogleAnalyticsClient
 from bot.logger import LoggerMixin
 from bot.music.music import EntityType
 from bot.music.spotify import SpotifyClient
@@ -16,16 +17,18 @@ class SearchInline(LoggerMixin):
         self.update = update
         self.context = context
         self.spotify_client = SpotifyClient()
+        self.ga_client = GoogleAnalyticsClient(update, context)
         self._perform_search()
 
     def _perform_search(self):
         self.log_inline(self.INLINE, self.update)
+        self.ga_client.push_search(self)
         user_input = self.update.inline_query.query
-        entity_type = self._get_entity_type(user_input)
+        entity_type = self.get_entity_type(user_input)
         if not entity_type:
             return
 
-        query = user_input.replace(entity_type, '').strip()
+        query = self.get_query(user_input, entity_type)
         results = []
         if len(query) >= 3:
             search_results = self.spotify_client.search_link(query, entity_type)
@@ -67,7 +70,11 @@ class SearchInline(LoggerMixin):
         return results
 
     @staticmethod
-    def _get_entity_type(user_input):
+    def get_query(user_input, entity_type):
+        return user_input.replace(entity_type, '').strip()
+
+    @staticmethod
+    def get_entity_type(user_input):
         entity_type = user_input.split(' ', 1)[0]
         valid_entity_type = False
 

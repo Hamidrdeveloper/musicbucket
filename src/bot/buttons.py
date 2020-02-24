@@ -2,15 +2,22 @@ import datetime
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+from bot.google_analytics import GoogleAnalyticsClient
+from bot.logger import LoggerMixin
 from bot.models import SavedLink
 
 
-class ButtonMixin:
+class ButtonMixin(LoggerMixin):
 
     @classmethod
     def get_callback_data(cls, query_data):
         callback_data = query_data.split(f"{cls.CALLBACK_NAME}:")[1]
         return callback_data
+
+    @classmethod
+    def _push_to_analytics(cls, update, context):
+        ga_client = GoogleAnalyticsClient(update, context)
+        ga_client.push_button()
 
 
 class SaveLinkButton(ButtonMixin):
@@ -26,6 +33,7 @@ class SaveLinkButton(ButtonMixin):
         user_id = query.from_user.id
         link_id = cls.get_callback_data(query.data)
         cls._save_to_user_saved_links(user_id, link_id)
+        cls.log_button(cls.CALLBACK_NAME, update, link_id)
         return
 
     @staticmethod
@@ -63,6 +71,7 @@ class DeleteSavedLinkButton(ButtonMixin):
         saved_link_id = cls.get_callback_data(query.data)
         if saved_link_id:
             cls._delete_from_user_saved_links(saved_link_id)
+        cls.log_button(cls.CALLBACK_NAME, update, saved_link_id)
         context.bot.edit_message_reply_markup(
             chat_id=query.message.chat_id,
             message_id=query.message.message_id
