@@ -11,7 +11,8 @@ from telegram.ext import CallbackContext
 from bot.buttons import DeleteSavedLinkButton
 from bot.logger import LoggerMixin
 from bot.messages import UrlProcessor
-from bot.models import Chat, Link, Album, LastFMUsername, User, CreateOrUpdateMixin, SavedLink, Track, Artist, ChatLink
+from bot.models import Chat, Link, Album, LastFMUsername, User, CreateOrUpdateMixin, SavedLink, Track, Artist, ChatLink, \
+    Genre
 from bot.music.lastfm import LastFMClient
 from bot.music.music import LinkType, EntityType
 from bot.music.spotify import SpotifyClient
@@ -549,6 +550,7 @@ class StatsCommand(Command):
     Shows the links sent count for every user in the current chat
     """
     COMMAND = 'stats'
+    MOST_USED_GENRES_NUM = 3
 
     def get_response(self):
         stats_by_user = self._get_stats_by_user()
@@ -564,6 +566,11 @@ class StatsCommand(Command):
                 user.links
             )
         return msg
+
+    def _get_genres_stats(self):
+        """Returns a queryset of the N most sent genres in a chat"""
+        most_used_genres = Genre.select() \
+            .join(Artist, on=)
 
     def _get_stats_by_user(self):
         stats_by_user = User.select(User, fn.Count(ChatLink.id).alias('links')) \
